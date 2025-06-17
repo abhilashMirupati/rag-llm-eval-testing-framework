@@ -1,191 +1,67 @@
-# Contributing to RAG-LLM Evaluation Framework
+# Contributing to the RAG-LLM Evaluation Framework
 
-Thank you for your interest in contributing to the RAG-LLM Evaluation Framework! This document provides guidelines and instructions for contributing.
+First off, thank you for considering contributing! Your help is essential for keeping this project great. This document provides guidelines to ensure a smooth and effective contribution process.
 
 ## Code of Conduct
 
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-## How to Contribute
+## How Can I Contribute?
 
-### 1. Fork and Clone
+There are many ways to contribute, from writing code and documentation to reporting bugs and suggesting new features.
 
-1. Fork the repository
-2. Clone your fork:
-```bash
-git clone https://github.com/yourusername/rag-llm-eval.git
-cd rag-llm-eval
-```
+### Reporting Bugs
 
-### 2. Set Up Development Environment
+- **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/yourusername/rag-llm-eval-testing-framework/issues).
+- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/yourusername/rag-llm-eval-testing-framework/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample or an executable test case** demonstrating the expected behavior that is not occurring.
 
-1. Install Poetry:
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
+### Suggesting Enhancements
 
-2. Install dependencies:
-```bash
-poetry install
-```
+- Open a new issue to discuss your enhancement. Clearly describe the proposed enhancement, its use case, and provide examples if possible.
+- This allows for community feedback and ensures your work aligns with the project's goals before you invest a lot of time.
 
-3. Set up pre-commit hooks:
-```bash
-poetry run pre-commit install
-```
+### Pull Requests
 
-### 3. Create a Branch
-
-Create a new branch for your feature or fix:
-```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/your-fix-name
-```
-
-### 4. Make Changes
-
-1. Write your code following our style guide
-2. Add tests for new features
-3. Update documentation
-4. Run tests locally:
-```bash
-poetry run pytest
-```
-
-### 5. Commit Changes
-
-Follow our commit message format:
-```
-type(scope): description
-
-[optional body]
-
-[optional footer]
-```
-
-Types:
-- feat: New feature
-- fix: Bug fix
-- docs: Documentation
-- style: Formatting
-- refactor: Code restructuring
-- test: Adding tests
-- chore: Maintenance
-
-Example:
-```
-feat(metrics): add new factuality metric
-
-- Implemented new factuality scoring
-- Added tests
-- Updated documentation
-
-Closes #123
-```
-
-### 6. Push and Create Pull Request
-
-1. Push your changes:
-```bash
-git push origin feature/your-feature-name
-```
-
-2. Create a Pull Request on GitHub
-3. Fill out the PR template
-4. Request review from maintainers
+1.  **Fork and Clone**: Fork the repository and clone it locally. Connect your local to the original "upstream" repository by adding it as a remote.
+2.  **Create a Branch**: Create a new branch from `main` for your changes. Use a descriptive name like `feature/new-metric-name` or `fix/dashboard-bug`.
+3.  **Set Up Environment**: Use Poetry to set up your development environment.
+    ```bash
+    # Install dependencies
+    poetry install
+    # Activate pre-commit hooks
+    poetry run pre-commit install
+    ```
+4.  **Make Changes**: Write your code. Ensure it follows our style guidelines and that all tests pass.
+5.  **Add Tests**: If you add new functionality, you must add tests. If you fix a bug, add a test that catches the bug.
+6.  **Update Documentation**: Update any relevant documentation (`README.md`, `README_dev.md`, docstrings, etc.).
+7.  **Commit and Push**: Follow our commit message format (see below). Push your changes to your fork.
+8.  **Create a Pull Request**: Open a pull request to the `main` branch of the upstream repository. Provide a clear description of the changes and link to any relevant issues.
 
 ## Development Guidelines
 
 ### Code Style
+- We follow **PEP 8** for Python code.
+- We use **Black** for code formatting, **isort** for import sorting, and **Flake8** for linting. These are enforced by the pre-commit hooks.
+- **Type hints** are required for all function signatures.
+- **Docstrings** should follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).
 
-- Follow PEP 8
-- Use type hints
-- Write docstrings
-- Keep functions small and focused
-- Use meaningful variable names
+### Commit Message Format
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. This helps in automating changelog generation and makes the project history easier to read.
+
+Format: `type(scope): description`
+
+-   **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `build`.
+-   **Scope** (optional): The part of the codebase you're changing (e.g., `scorer`, `dashboard`, `config`).
+
+Example:
+`feat(scorer): add new answer_similarity metric`
 
 ### Testing
-
-- Write unit tests for all new code
-- Maintain test coverage
-- Use fixtures for common setup
-- Test edge cases
-- Run tests before committing
-
-### Documentation
-
-- Update README.md for user-facing changes
-- Update README_dev.md for developer-facing changes
-- Document API changes
-- Add examples for new features
-- Keep comments up to date
-
-### Pull Request Process
-
-1. Update documentation
-2. Add tests
-3. Ensure all tests pass
-4. Update changelog
-5. Get code review
-6. Address review comments
-7. Merge only after approval
-
-## Adding New Features
-
-### New Metrics
-
-1. Create test file in `tests/`
-2. Add implementation in `utils/scorer.py`
-3. Update configuration
-4. Add documentation
-5. Add tests
-
-### New Model Support
-
-1. Create parser in `parsers/`
-2. Update model configuration
-3. Add tests
-4. Update documentation
-
-### Dashboard Features
-
-1. Add visualization in `dashboard/app.py`
-2. Update UI components
-3. Add tests
-4. Update documentation
-
-## Reporting Issues
-
-1. Use the issue template
-2. Provide detailed description
-3. Include steps to reproduce
-4. Add error messages
-5. Include environment details
-
-## Review Process
-
-1. Code review by maintainers
-2. Automated checks must pass
-3. Documentation review
-4. Test coverage check
-5. Final approval
-
-## Release Process
-
-1. Update version number
-2. Update changelog
-3. Create release notes
-4. Tag release
-5. Deploy
-
-## Getting Help
-
-- Check documentation
-- Join our community
-- Ask in issues
-- Contact maintainers
+- All new code must be accompanied by tests.
+- We use `pytest`. Run tests locally with `poetry run pytest`.
+- Aim for high test coverage. Check coverage with `poetry run pytest --cov`.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the project's MIT License. 
+By contributing, you agree that your contributions will be licensed under the project's MIT License.
