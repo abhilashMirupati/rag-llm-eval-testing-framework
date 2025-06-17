@@ -1,0 +1,7 @@
+metric,question,answer,context,ground_truth_answer,instruction,expected_min_score
+faithfulness,"What is the capital of France?","The capital of France is Paris.","Paris is the capital of France, a large country in western Europe.",,,"0.9"
+answer_relevance,"What is the primary function of a mitochondria?","The primary function of a mitochondria is to generate most of the cell's supply of adenosine triphosphate (ATP).",,,"",0.9
+answer_relevance,"What is the capital of Canada?","A dog is a man's best friend.",,,"",0.0
+context_relevance,"What causes the seasons?","The tilt of the Earth's axis is the primary cause of the seasons.","The Earth's axial tilt is about 23.5 degrees. This tilt, combined with the Earth's revolution around the sun, causes different parts of the Earth to receive direct sunlight for more hours of the day at certain times of the year.",,,"0.9"
+fluency,"What is AI?","Artifishal inteligence is a feild of computer scince that focus on create smart mashines.",,,,"0.5"
+instruction_following,"Summarize the following text in exactly one sentence.","The text was summarized in a single sentence.","The text describes the water cycle, including evaporation, condensation, and precipitation.",,"Summarize the following text in exactly one sentence.","0.9"

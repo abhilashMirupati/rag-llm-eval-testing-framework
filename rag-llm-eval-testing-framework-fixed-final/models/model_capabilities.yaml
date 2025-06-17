@@ -1,0 +1,80 @@
+# This file defines the capabilities and supported metrics for each model.
+# The framework uses this file to determine which evaluations can be run
+# for a given LLM.
+
+models:
+  # Configuration for OpenAI models
+  gpt-4:
+    supported_metrics:
+      - faithfulness
+      - answer_relevancy
+      - context_precision
+      - context_recall
+      - factuality
+      - hallucination
+      - coherence
+      - completeness
+      - conciseness
+      - instruction_following
+      - overall_quality
+      - redundancy
+      - groundedness
+      - fluency
+  gpt-3.5-turbo:
+    supported_metrics:
+      - faithfulness
+      - answer_relevancy
+      - context_precision
+      - context_recall
+      - factuality
+      - hallucination
+      - coherence
+      - completeness
+      - conciseness
+      - instruction_following
+
+  # Configuration for Anthropic models
+  claude-2:
+    supported_metrics:
+      - faithfulness
+      - context_precision
+      - context_recall
+      - factuality
+      - hallucination
+      - coherence
+      - completeness
+      - conciseness
+
+metrics:
+  # Defines the required inputs for each metric.
+  # This helps the framework validate that it has the necessary data to run a metric.
+  faithfulness:
+    required_inputs: [answer, context]
+  answer_relevancy:
+    required_inputs: [answer, question]
+  context_relevancy:
+    required_inputs: [context, question]
+  context_precision:
+    required_inputs: [question, answer, context]
+  context_recall:
+    required_inputs: [question, answer, context]
+  factuality:
+    required_inputs: [answer, context]
+  hallucination:
+    required_inputs: [answer, context]
+  coherence:
+    required_inputs: [answer]
+  completeness:
+    required_inputs: [question, answer]
+  conciseness:
+    required_inputs: [answer]
+  instruction_following:
+    required_inputs: [answer, instruction]
+  overall_quality:
+    required_inputs: [question, answer, context]
+  redundancy:
+    required_inputs: [answer]
+  groundedness:
+    required_inputs: [answer, context]
+  fluency:
+    required_inputs: [answer]

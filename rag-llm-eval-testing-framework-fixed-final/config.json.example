@@ -1,0 +1,67 @@
+{
+    "metrics": [
+        {
+            "name": "factuality",
+            "enabled": true,
+            "threshold": 0.8,
+            "weight": 1.0,
+            "description": "Measures the factual accuracy of generated responses"
+        },
+        {
+            "name": "context_precision",
+            "enabled": true,
+            "threshold": 0.7,
+            "weight": 1.0,
+            "description": "Evaluates how precisely the response uses the provided context"
+        }
+    ],
+    "models": [
+        {
+            "name": "gpt-3.5-turbo",
+            "enabled": true,
+            "parameters": {
+                "temperature": 0.7,
+                "max_tokens": 1000,
+                "top_p": 1.0,
+                "frequency_penalty": 0.0,
+                "presence_penalty": 0.0
+            },
+            "supported_metrics": [
+                "factuality",
+                "context_precision",
+                "context_recall",
+                "faithfulness",
+                "hallucination",
+                "qa_match",
+                "helpfulness",
+                "coherence",
+                "conciseness",
+                "completeness"
+            ]
+        }
+    ],
+    "evaluation": {
+        "batch_size": 32,
+        "output_dir": "reports",
+        "save_intermediate": true,
+        "parallel_processing": false,
+        "max_workers": 4,
+        "timeout": 300,
+        "retry_attempts": 3
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "logs/evaluation.log",
+        "max_size": 10485760,
+        "backup_count": 5,
+        "console_output": true,
+        "json_format": true
+    },
+    "dashboard": {
+        "port": 8501,
+        "host": "localhost",
+        "debug": false,
+        "theme": "light",
+        "refresh_interval": 60
+    }
+} 

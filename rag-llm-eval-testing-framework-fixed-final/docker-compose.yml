@@ -1,0 +1,27 @@
+# Docker Compose file for setting up the RAG evaluation environment.
+# This setup includes the main application/dashboard service and a PostgreSQL database service.
+version: '3.8'
+
+services:
+  # The 'dashboard' service runs the main Streamlit application.
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501" # Maps the host's port 8501 to the container's port 8501.
+    volumes:
+      # Mounts local data and logs directories into the container for persistence.
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      # Sets environment variables within the container.
+      - PYTHONPATH=/app
+      - DB_PATH=/app/data/results/results.db # Path to the SQLite DB, if used.
+      - DASHBOARD_THEME=light
+      - DASHBOARD_PORT=8501
+      - DASHBOARD_HOST=0.0.0.0
+      # API keys should be passed from the host environment (e.g., from a .env file).
+      - OPENAI_API_KEY=<span class="math-inline">\{OPENAI\_API\_KEY\}
+\- ANTHROPIC\_API\_KEY\=</span>{ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=<span class="math-inline">\{GOOGLE\_API\_KEY\}
+\- COHERE\_API\_KEY\=</span>{COHERE_API_KEY}
+      - HUGGINGFACE_API_KEY=${HUG

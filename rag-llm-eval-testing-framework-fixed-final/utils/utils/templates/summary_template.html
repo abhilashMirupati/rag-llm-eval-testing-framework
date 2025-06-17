@@ -1,0 +1,8 @@
+<div class="summary" style="font-family: Arial, sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+    <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px;">Evaluation Summary</h2>
+    <p><strong>Total Metrics:</strong> {{ summary.total_metrics }}</p>
+    <p><strong>Average Score:</strong> {{ "%.2f"|format(summary.average_score) }}</p>
+    <p><strong>Passed:</strong> {{ summary.total_passed }}</p>
+    <p><strong>Failed:</strong> {{ summary.total_failed }}</p>
+    <p><strong>Pass Rate:</strong> {{ "%.2f"|format(summary.pass_rate) }}%</p>
+</div>
