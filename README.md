@@ -1,167 +1,125 @@
-# RAG LLM Evaluation Framework
+# RAG-LLM Evaluation Framework - Developer Guide
 
-A comprehensive framework for evaluating Retrieval-Augmented Generation (RAG) systems with various LLMs.
+This guide provides in-depth information for developers working on the framework's core components.
 
-## Features
+## 🏗️ Architectural Overview
 
-- Multiple evaluation metrics
-- Support for various LLMs
-- Interactive dashboard
-- Comprehensive reporting
-- Easy configuration
-- Extensive test suite
+The framework is designed with a modular architecture to ensure separation of concerns and extensibility.
 
-## LLM Compatibility
+-   **`rag-eval-cli.py`**: The entry point for command-line operations. It uses `argparse` to parse arguments and calls `run_evaluation` in `main.py`.
+-   **`main.py`**: The central orchestrator. It uses the various manager classes to coordinate the evaluation workflow: config -> data loading -> evaluation -> reporting.
+-   **`utils/config_manager.py`**: Handles loading and providing access to settings from `config.json`.
+-   **`utils/data_loader.py`**: Responsible for loading evaluation datasets from different file formats.
+-   **`utils/metrics_manager.py`**: Iterates through the metrics defined in the config and calls the appropriate methods in the `Scorer`.
+-   **`utils/scorer.py`**: The heart of the evaluation logic. Each metric has its own `evaluate_<metric_name>` method. This is where the actual computation happens.
+-   **`utils/reporter.py`**: Takes the final results and generates reports in various formats (HTML, JSON, PDF) using templates.
+-   **`dashboard/app.py`**: A self-contained Streamlit application for visualizing results stored in the database.
 
-| LLM Model | Supported Metrics | Notes |
-|-----------|------------------|--------|
-| GPT-4 | All metrics | Best performance, recommended for production |
-| GPT-3.5 | All metrics | Good balance of performance and cost |
-| Claude | All metrics | Strong performance, good for long-form content |
-| Llama 2 | Basic metrics | Open source, good for testing |
-| Mistral | Basic metrics | Open source, efficient performance |
+## 🛠️ Development Setup
 
-### Metric Support Details
+1.  **Prerequisites**: Python 3.9+ and Poetry.
+2.  **Installation**:
+    ```bash
+    # Clone the repository
+    git clone [https://github.com/yourusername/rag-llm-eval-testing-framework.git](https://github.com/yourusername/rag-llm-eval-testing-framework.git)
+    cd rag-llm-eval-testing-framework
 
-| Metric | GPT-4 | GPT-3.5 | Claude | Llama 2 | Mistral |
-|--------|-------|---------|--------|---------|---------|
-| Factuality | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
-| Context Precision | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Context Recall | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Faithfulness | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
-| Hallucination | ✅ | ✅ | ✅ | ❌ | ❌ |
-| QA Match | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Helpfulness | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
-| Coherence | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Conciseness | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Completeness | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
+    # Install dependencies using Poetry
+    poetry install
 
-Legend:
-- ✅: Fully supported
-- ⚠️: Partial support
-- ❌: Not supported
+    # Install pre-commit hooks for automated code quality checks
+    poetry run pre-commit install
+    ```
+3.  **Environment Variables**:
+    Copy `.env.example` to `.env` and fill in your API keys. The framework loads these variables automatically.
+    ```bash
+    cp .env.example .env
+    ```
 
-## Quick Start
+## 🧪 Running Tests
 
-1. **Installation**:
-```bash
-pip install -r requirements.txt
-```
+-   **Run all tests**:
+    ```bash
+    poetry run pytest
+    ```
+-   **Run a specific test file**:
+    ```bash
+    poetry run pytest tests/tests/test_metrics/test_faithfulness.py
+    ```
+-   **Run tests with coverage report**:
+    ```bash
+    poetry run pytest --cov=utils
+    ```
 
-2. **Configuration**:
-Edit `config.json` to set up your preferred LLM and metrics.
+## 📈 Adding a New Metric
 
-3. **Run Tests**:
-```bash
-python -m pytest tests/
-```
+Follow these steps to add a new metric called `your_metric`:
 
-4. **Start Dashboard**:
-```bash
-./dashboard.sh
-```
+1.  **Implement the Logic in `Scorer`**:
+    Open `utils/utils/scorer.py` and add a new method. It must accept the necessary inputs (e.g., answer, context) and return an `EvaluationResult` object.
 
-## Project Structure
+    ```python
+    # In utils/utils/scorer.py
+    from .scorer import EvaluationResult
 
-```
-rag-llm-eval-testing-framework/
-├── utils/                    # Core utilities
-│   └── utils/
-│       ├── data_loader.py    # Data loading utilities
-│       ├── config_manager.py # Configuration management
-│       ├── metrics_manager.py# Metric calculations
-│       ├── report_generator.py# Report generation
-│       ├── logger.py        # Logging utilities
-│       └── templates/       # HTML templates
-├── tests/                   # Test files
-├── examples/               # Example implementations
-├── dashboard/             # Dashboard application
-├── models/               # Model implementations
-├── config.json          # Configuration file
-├── requirements.txt     # Dependencies
-└── README.md           # Project documentation
-```
+    def evaluate_your_metric(self, answer: str, context: str) -> EvaluationResult:
+        # Your logic here
+        score = 0.9 # Calculate the score
+        details = "Your metric evaluation was successful."
+        return EvaluationResult(score=score, details=details)
+    ```
 
-## Documentation
+2.  **Add a Test File**:
+    Create a new file `tests/tests/test_metrics/test_your_metric.py`. Use the `BaseMetricTest` class to minimize boilerplate.
 
-- [Guide for Freshers](GUIDE_FOR_FRESHERS.md): Comprehensive guide for newcomers
-- [Contributing Guidelines](CONTRIBUTING.md): How to contribute to the project
-- [Code of Conduct](CODE_OF_CONDUCT.md): Community guidelines
+    ```python
+    # In tests/tests/test_metrics/test_your_metric.py
+    from tests.utils.base_metric_test import BaseMetricTest
+    # ... other imports
 
-## Key Components
+    class TestYourMetric(BaseMetricTest):
+        metric_name = "your_metric"
 
-### 1. Metrics Manager
-- Handles metric calculations
-- Supports multiple evaluation metrics
-- Provides aggregation functions
+        def run_evaluation(self, test_case: dict) -> EvaluationResult:
+            # Extract inputs and call the scorer method
+            answer = test_case["answer"]
+            context = test_case["context"]
+            return self.scorer.evaluate_your_metric(answer, context)
 
-### 2. Data Loader
-- Supports multiple input formats (JSON, CSV, YAML, XML, TXT)
-- Data validation and preprocessing
-- Flexible data structure
+        @pytest.mark.parametrize("test_case", BaseMetricTest.get_test_cases(metric_name))
+        def test_your_metric_logic(self, test_case: dict):
+            self.test_metric_logic(test_case)
+    ```
 
-### 3. Report Generator
-- Generates comprehensive reports
-- Supports multiple formats (HTML, JSON, CSV)
-- Includes visualizations
+3.  **Add Test Data**:
+    Open `tests/data/test_data.json` and add test cases for your new metric.
 
-### 4. Dashboard
-- Interactive visualization
-- Real-time monitoring
-- Customizable views
+    ```json
+    "your_metric": [
+      {
+        "answer": "An example answer.",
+        "context": "An example context.",
+        "expected_min_score": 0.8
+      }
+    ]
+    ```
 
-## Usage Examples
+4.  **Update `MetricsManager`**:
+    Open `utils/utils/metrics_manager.py` and ensure the `evaluate_metrics` method correctly passes the required arguments to your new scorer method. You may need to add a new condition.
 
-### Basic Usage
-```python
-from utils.utils.metrics_manager import MetricsManager
-from utils.utils.data_loader import DataLoader
+5.  **(Optional) Add to `config.json`**:
+    To run your new metric by default, add `"your_metric"` to the `metrics` list in `config.json`.
 
-# Load data
-data = DataLoader.load_json("data.json")
+## 🤖 Adding New Model Support
 
-# Calculate metrics
-metrics = MetricsManager()
-results = metrics.calculate_all_metrics(data)
-```
+1.  **Update `LLMWrapper`**:
+    If the new model uses a different API provider, add logic to `utils/utils/llm_wrapper.py` to initialize its client and handle its `get_completion` request/response format.
 
-### Advanced Usage
-```python
-from utils.utils.report_generator import ReportGenerator
-from utils.utils.config_manager import ConfigManager
+2.  **Update `ResponseParser`**:
+    Add a new `parse_<provider>` method to `utils/utils/response_parser.py` to transform the new model's raw response into a standardized `ParsedResponse` object.
 
-# Load configuration
-config = ConfigManager.load_config("config.json")
+3.  **Update `model_capabilities.yaml`**:
+    Add the new model and its supported metrics to `models/model_capabilities.yaml`.
 
-# Generate report
-generator = ReportGenerator()
-report = generator.generate_report(
-    results,
-    metadata={"model": "gpt-4"},
-    format="html"
-)
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-- Create an issue for bugs
-- Ask questions in discussions
-- Contact maintainers
-
-## Acknowledgments
-
-- Contributors
-- Open source community
-- Research papers and resources 
+4.  **Add to `config.json`**:
+    You can now specify the new model in your `config.json` to use it for evaluations.
