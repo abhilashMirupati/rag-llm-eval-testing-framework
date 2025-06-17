@@ -1,0 +1,25 @@
+{
+    "model_name": "gpt-4",
+    "llm_provider": "openai",
+    "metrics": [
+      "faithfulness",
+      "answer_relevance",
+      "context_relevance",
+      "fluency",
+      "conciseness"
+    ],
+    "api_keys": {
+      "openai": "YOUR_OPENAI_API_KEY_HERE",
+      "anthropic": "YOUR_ANTHROPIC_API_KEY_HERE"
+    },
+    "data_loader": {
+      "default_path": "data/evaluation_data.csv"
+    },
+    "reporter": {
+      "report_formats": [
+        "json",
+        "html"
+      ],
+      "output_dir": "reports"
+    }
+  }
