@@ -99,4 +99,4 @@ def test_prompt_quality_with_complex_prompts():
     result = scorer.evaluate(prompt, context, None, "prompt_quality")
     assert result.score > 0.7
     assert "complexity_score" in result.details
-    assert result.details["complexity_score"] > 0.7 
+    assert result.details["complexity_score"] > 0.7
