@@ -66,4 +66,7 @@ def test_evaluation_runner_flow(
     mock_metrics_manager_instance.evaluate_metrics.assert_called_once()
     
     # Check that the results were passed to the Reporter
-    mock_reporter.
+    mock_reporter_instance.generate_report.assert_called_once_with(
+        results=MOCK_EVALUATION_RESULTS,
+        report_formats=["json"]
+    )
