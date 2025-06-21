@@ -1,38 +1,73 @@
-from typing import List, Dict, Any
-from .scorer import Scorer, EvaluationResult
-from .config_manager import ConfigManager
-from .logger import setup_logger
+import importlib
+import logging
 
-logger = setup_logger(__name__)
+from utils.utils.config_manager import ConfigManager
 
 class MetricsManager:
-    """Orchestrates the evaluation of multiple metrics."""
-    def __init__(self, scorer: Scorer, config_manager: ConfigManager):
-        self.scorer = scorer
-        self.config_manager = config_manager
+    """
+    Manages the loading, initialization, and orchestration of evaluation metrics.
+    Supports dynamic loading of both built-in and custom metrics via config.
+    """
+    def __init__(self, config):
+        self.logger = logging.getLogger("metrics_manager")
+        self.config = config
+        self.metrics = self._load_metrics()
 
-    def evaluate_metrics(self, data_point: Dict[str, Any]) -> List[EvaluationResult]:
-        results = []
-        metrics_to_run = self.config_manager.get_metrics()
-        for metric_name in metrics_to_run:
-            evaluation_method_name = f"evaluate_{metric_name}"
-            if not hasattr(self.scorer, evaluation_method_name):
-                logger.warning(f"Metric '{metric_name}' is configured but no method found in Scorer. Skipping.")
-                continue
-            evaluation_method = getattr(self.scorer, evaluation_method_name)
+    def _load_metrics(self):
+        """
+        Loads and initializes metric classes based on the provided config.
+        Returns a dict of metric_name: metric_instance.
+        """
+        metrics = {}
+        metric_configs = self.config.get("metrics", [])
+        if not metric_configs:
+            self.logger.warning("No metrics specified in config. No evaluation will be performed.")
+            return metrics
+
+        for metric_entry in metric_configs:
+            if isinstance(metric_entry, dict):
+                # Support for metrics with config (name + params)
+                metric_name = metric_entry.get("name")
+                metric_params = metric_entry.get("params", {})
+            else:
+                metric_name = metric_entry
+                metric_params = {}
+
             try:
-                # This is a simplified example of argument mapping
-                if metric_name in ["answer_relevance", "completeness", "helpfulness"]:
-                    result = evaluation_method(answer=data_point["answer"], question=data_point["question"])
-                elif metric_name in ["faithfulness", "factuality", "hallucination", "groundedness"]:
-                    result = evaluation_method(answer=data_point["answer"], context=data_point["context"])
-                elif metric_name in ["coherence", "conciseness", "fluency", "redundancy"]:
-                    result = evaluation_method(answer=data_point["answer"])
-                else:
-                    result = evaluation_method(question=data_point["question"], answer=data_point["answer"], context=data_point["context"])
-                results.append(result)
-            except KeyError as e:
-                logger.error(f"Missing key '{e}' in data point for metric '{metric_name}'. Skipping.")
+                module_path, class_name = self._resolve_metric_path(metric_name)
+                metric_module = importlib.import_module(module_path)
+                metric_class = getattr(metric_module, class_name)
+                metrics[metric_name] = metric_class(**metric_params)
+                self.logger.info(f"Loaded metric: {metric_name} ({module_path}.{class_name})")
+            except (ImportError, AttributeError, TypeError) as e:
+                self.logger.error(f"Failed to load metric '{metric_name}': {e}")
+
+        return metrics
+
+    def _resolve_metric_path(self, metric_name):
+        """
+        Resolves the import path and class name for a given metric.
+        This supports both built-in and custom metrics.
+        """
+        metric_config = ConfigManager.get_metric_config(metric_name)
+        module_path = metric_config["module"]
+        class_name = metric_config["class"]
+        return module_path, class_name
+
+    def get_metrics(self):
+        """Returns the dict of loaded metric instances."""
+        return self.metrics
+
+    def evaluate_all(self, test_case, parsed_answer):
+        """
+        Evaluates all enabled metrics on a test case.
+        Returns a dict of metric_name: score.
+        """
+        results = {}
+        for name, metric in self.metrics.items():
+            try:
+                results[name] = metric.evaluate(test_case, parsed_answer)
             except Exception as e:
-                logger.error(f"Error during evaluation of metric '{metric_name}': {e}")
+                self.logger.error(f"Metric '{name}' evaluation failed: {e}")
+                results[name] = None
         return results
