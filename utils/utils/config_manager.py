@@ -13,7 +13,6 @@ class ConfigManager:
         """Loads the configuration from the specified JSON file."""
         if not self.config_path.is_file():
             raise FileNotFoundError(f"Configuration file not found at: {self.config_path}")
-        
         try:
             with self.config_path.open('r', encoding='utf-8') as f:
                 return json.load(f)
@@ -21,19 +20,25 @@ class ConfigManager:
             raise ValueError(f"Error decoding JSON from config file: {self.config_path}") from e
 
     def get_model_name(self) -> str:
+        """Returns the model name from config, or a default."""
         return self.config.get("model_name", "gpt-4")
 
     def get_metrics(self) -> List[str]:
+        """Returns the list of metrics from config, or an empty list."""
         return self.config.get("metrics", [])
 
     def get_llm_provider(self) -> str:
+        """Returns the LLM provider from config, or a default."""
         return self.config.get("llm_provider", "openai")
         
     def get_reporter_config(self) -> Dict[str, Any]:
+        """Returns reporter-related config."""
         return self.config.get("reporter", {})
 
     def get_data_loader_config(self) -> Dict[str, Any]:
+        """Returns data loader config."""
         return self.config.get("data_loader", {})
 
     def get_api_key(self, provider: str) -> Optional[str]:
+        """Returns API key for the specified provider, if present."""
         return self.config.get("api_keys", {}).get(provider)
