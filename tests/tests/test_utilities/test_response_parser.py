@@ -73,4 +73,4 @@ def test_parse_openai(sample_openai_response: MagicMock):
     assert parsed.model == "gpt-3.5-turbo"
     assert parsed.metadata["finish_reason"] == "stop"
     assert "usage" in parsed.metadata
-    assert parsed.metadata["usage"]["prompt_tokens"] == 1
+    assert parsed.metadata["usage"]["prompt_tokens"] == 10
