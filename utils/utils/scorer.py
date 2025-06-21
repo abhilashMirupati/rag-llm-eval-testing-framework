@@ -107,7 +107,7 @@ class Scorer:
             self.logger.error(f"Redundancy evaluation failed: {e}")
             return EvaluationResult(score=0.0, details="Redundancy evaluation error.")
 
-    # Add any further metric methods as in your original file, preserving all custom logic.
+    # (Add any further metric methods from your original file, exactly as written.)
 
     def evaluate_all(self, context: str, question: str, answer: str) -> dict:
         """
