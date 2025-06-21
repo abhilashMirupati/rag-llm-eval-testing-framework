@@ -20,7 +20,7 @@ DB_PATH = os.getenv("DB_PATH", "data/results.db")
 DASHBOARD_THEME = os.getenv("DASHBOARD_THEME", "light")
 
 @st.cache_data(ttl=600)
-def load_data(db_path: str) -> pd.DataFrame:
+def load_data(db_path: str = DB_PATH) -> pd.DataFrame:
     """Load evaluation results from SQLite database, with caching."""
     if not os.path.exists(db_path):
         st.error(f"Database not found at {db_path}. Please ensure the path is correct and evaluation data exists.")
