@@ -23,6 +23,9 @@ class LLMWrapper:
 
     @retry_with_exponential_backoff
     def get_completion(self, prompt: str, model: str, **kwargs) -> Any:
+        """
+        Gets a completion from the configured provider/model.
+        """
         if self.provider == 'openai':
             return self._get_openai_completion(prompt, model, **kwargs)
         elif self.provider == 'anthropic':
@@ -36,5 +39,10 @@ class LLMWrapper:
 
     def _get_anthropic_completion(self, prompt: str, model: str, **kwargs) -> Any:
         max_tokens = kwargs.pop("max_tokens", 1024)
-        response = self.client.messages.create(model=model, max_tokens=max_tokens, messages=[{"role": "user", "content": prompt}], **kwargs)
+        response = self.client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}],
+            **kwargs
+        )
         return response
