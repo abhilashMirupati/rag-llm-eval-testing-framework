@@ -6,9 +6,6 @@ from utils.utils.cli_formatter import CLIFormatter
 def sample_evaluation_results() -> List[Dict[str, Any]]:
     """
     Provides a sample list of evaluation results as a pytest fixture.
-    
-    This keeps the test data separate from the test logic, making the
-    tests cleaner and easier to read.
     """
     return [
         {
@@ -48,10 +45,8 @@ def test_format_results(sample_evaluation_results: List[Dict[str, Any]]):
     Tests the format_results function to ensure it formats individual
     metric results correctly.
     """
-    # Act
     formatted_output = CLIFormatter.format_results(sample_evaluation_results)
 
-    # Assert
     assert "faithfulness" in formatted_output
     assert "0.85" in formatted_output
     assert "[PASSED]" in formatted_output
@@ -65,10 +60,8 @@ def test_format_summary(sample_summary_data: Dict[str, Any]):
     Tests the format_summary function to ensure it formats the
     summary section correctly.
     """
-    # Act
     formatted_output = CLIFormatter.format_summary(sample_summary_data)
 
-    # Assert
     assert "Evaluation Summary" in formatted_output
     assert "Total Passed: 2" in formatted_output
     assert "Total Failed: 1" in formatted_output
@@ -79,28 +72,20 @@ def test_empty_results_handling():
     """
     Tests that the formatter handles an empty list of results gracefully.
     """
-    # Act
     formatted_output = CLIFormatter.format_results([])
-
-    # Assert
     assert formatted_output == ""
 
 def test_empty_summary_handling():
     """
     Tests that the formatter handles empty or zero-value summary data.
     """
-    # Arrange
     empty_summary = {
         "total_passed": 0,
         "total_failed": 0,
         "pass_rate": 0.0,
         "average_score": 0.0,
     }
-    
-    # Act
     formatted_output = CLIFormatter.format_summary(empty_summary)
-
-    # Assert
     assert "Total Passed: 0" in formatted_output
     assert "Total Failed: 0" in formatted_output
     assert "Pass Rate: 0.00%" in formatted_output
