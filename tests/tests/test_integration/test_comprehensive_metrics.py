@@ -1,50 +1,59 @@
 import pytest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 from main import run_evaluation # Assuming main logic is in main.py
-from utils.utils.scorer import Scorer, EvaluationResult
+from utils.utils.scorer import EvaluationResult
+
+def custom_metric_function(answer: str, context: str) -> EvaluationResult:
+    """
+    This is a dummy custom metric function that we can use for testing.
+    It simulates a user-defined evaluation.
+    """
+    return EvaluationResult(score=1.0, details="Custom metric executed successfully!")
 
 @patch('main.load_data', return_value=[{"question": "q1", "answer": "a1", "context": "c1"}])
 @patch('main.ConfigManager')
 @patch('main.Reporter')
-@patch('main.Scorer')
-def test_comprehensive_run(mock_scorer, mock_reporter, mock_config, mock_load_data):
+@patch('main.MetricsManager')
+def test_custom_metric_execution(mock_metrics_manager, mock_reporter, mock_config, mock_load_data):
     """
-    Tests that the runner can handle a comprehensive list of metrics.
+    Tests if the framework can successfully run a custom metric.
     
-    This test verifies that the main evaluation loop iterates over all configured
-    metrics and calls the appropriate scoring method for each one.
+    This test ensures that if a 'custom' metric is defined, the evaluation
+    runner correctly identifies it and calls the appropriate execution logic.
     """
     # --- Arrange ---
-    # Define the list of metrics we want to simulate running
-    comprehensive_metrics_list = ["faithfulness", "answer_relevance", "coherence"]
-    
-    # Configure the mock Scorer instance to return a specific result for each metric
-    mock_scorer_instance = mock_scorer.return_value
-    mock_scorer_instance.evaluate_faithfulness.return_value = EvaluationResult(score=0.9, details="...")
-    mock_scorer_instance.evaluate_answer_relevance.return_value = EvaluationResult(score=0.8, details="...")
-    mock_scorer_instance.evaluate_coherence.return_value = EvaluationResult(score=0.7, details="...")
-    
+    # Tell the mock MetricsManager to use our dummy custom function
+    # when it encounters the "custom_metric_name".
+    mock_metrics_instance = mock_metrics_manager.return_value
+    mock_metrics_instance.evaluate_metrics.return_value = [
+        custom_metric_function("a1", "c1")
+    ]
+
+    # Configure the mock ConfigManager to include our custom metric
+    mock_config_instance = mock_config.return_value
+    mock_config_instance.get_metrics.return_value = ["custom_metric_name"]
+    mock_config_instance.get_reporter_config.return_value = {"report_formats": ["json"]}
+
     # --- Act ---
-    # We don't need a real runner, we can simulate the core logic of iterating
-    # through metrics and calling the scorer.
-    results = []
-    for metric in comprehensive_metrics_list:
-        # Construct the method name to call, e.g., 'evaluate_faithfulness'
-        evaluation_method_name = f"evaluate_{metric}"
-        # Get the actual method from our mock scorer instance
-        evaluation_method = getattr(mock_scorer_instance, evaluation_method_name)
-        # Call the method
-        result = evaluation_method() 
-        results.append(result)
+    run_evaluation(
+        data_path="dummy_data.csv",
+        config_path="dummy_config.json",
+        output_dir="dummy_output",
+        metrics=["custom_metric_name"]
+    )
 
     # --- Assert ---
-    # 1. Verify that each evaluation method on the scorer was called exactly once.
-    mock_scorer_instance.evaluate_faithfulness.assert_called_once()
-    mock_scorer_instance.evaluate_answer_relevance.assert_called_once()
-    mock_scorer_instance.evaluate_coherence.assert_called_once()
+    # Verify that the metrics manager was asked to evaluate our list of metrics
+    mock_metrics_instance.evaluate_metrics.assert_called_once()
     
-    # 2. Verify we have the correct number of results.
-    assert len(results) == 3
-    assert results[0].score == 0.9 # Check if results are in order
-    assert results[1].score == 0.8
-    assert results[2].score == 0.7
+    # Verify that the reporter received the result from our custom metric
+    mock_reporter_instance = mock_reporter.return_value
+    mock_reporter_instance.generate_report.assert_called_once()
+    
+    # Check the actual data passed to the reporter's generate_report method
+    call_args, _ = mock_reporter_instance.generate_report.call_args
+    reported_results = call_args[0]
+    
+    assert len(reported_results) == 1
+    assert reported_results[0].score == 1.0
+    assert reported_results[0].details == "Custom metric executed successfully!"
