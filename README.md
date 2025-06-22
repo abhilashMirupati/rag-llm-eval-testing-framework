@@ -1,125 +1,200 @@
-# RAG-LLM Evaluation Framework - Developer Guide
+# RAG-LLM Evaluation Testing Framework
 
-This guide provides in-depth information for developers working on the framework's core components.
+> **A Robust, Flexible, and Beginner-Friendly Framework to Evaluate Retrieval-Augmented Generation (RAG) LLM Systems.**
 
-## 🏗️ Architectural Overview
+---
 
-The framework is designed with a modular architecture to ensure separation of concerns and extensibility.
+## 🚀 What is this project?
 
--   **`rag-eval-cli.py`**: The entry point for command-line operations. It uses `argparse` to parse arguments and calls `run_evaluation` in `main.py`.
--   **`main.py`**: The central orchestrator. It uses the various manager classes to coordinate the evaluation workflow: config -> data loading -> evaluation -> reporting.
--   **`utils/config_manager.py`**: Handles loading and providing access to settings from `config.json`.
--   **`utils/data_loader.py`**: Responsible for loading evaluation datasets from different file formats.
--   **`utils/metrics_manager.py`**: Iterates through the metrics defined in the config and calls the appropriate methods in the `Scorer`.
--   **`utils/scorer.py`**: The heart of the evaluation logic. Each metric has its own `evaluate_<metric_name>` method. This is where the actual computation happens.
--   **`utils/reporter.py`**: Takes the final results and generates reports in various formats (HTML, JSON, PDF) using templates.
--   **`dashboard/app.py`**: A self-contained Streamlit application for visualizing results stored in the database.
+This project helps you **evaluate how well large language models (LLMs)** (like GPT-4, Claude, Llama2, etc.) **perform on Retrieval-Augmented Generation (RAG) tasks**—such as answering questions using retrieved context from your documents.  
+It supports **industry-standard metrics, full automation, rich reports, and plug-and-play support for new models or metrics**.
 
-## 🛠️ Development Setup
+- **Built for:**
+  - AI/ML engineers, QA/testers, and researchers
+  - Data/product teams validating model upgrades or knowledge base changes
+  - Beginners wanting to learn RAG LLM testing hands-on
 
-1.  **Prerequisites**: Python 3.9+ and Poetry.
-2.  **Installation**:
-    ```bash
-    # Clone the repository
-    git clone [https://github.com/yourusername/rag-llm-eval-testing-framework.git](https://github.com/yourusername/rag-llm-eval-testing-framework.git)
-    cd rag-llm-eval-testing-framework
+---
 
-    # Install dependencies using Poetry
-    poetry install
+## 🧩 Key Features
 
-    # Install pre-commit hooks for automated code quality checks
-    poetry run pre-commit install
-    ```
-3.  **Environment Variables**:
-    Copy `.env.example` to `.env` and fill in your API keys. The framework loads these variables automatically.
-    ```bash
-    cp .env.example .env
-    ```
+- **Automatic test case generation:** Feed your docs—generate, run, and score test cases (API/CSV/JSON or manual input).
+- **Extensive metric coverage:** Faithfulness, factuality, fluency, hallucination, answer/context relevance/precision/recall, redundancy, helpfulness, instruction-following, completeness, named entities, and more.
+- **Plug-and-play model support:** GPT-4, GPT-3.5, Claude, Llama, and your custom LLMs—just set config.
+- **Rich, exportable reporting:** Interactive dashboard (Streamlit), CLI output, JSON/HTML reports, and PDF export.
+- **No background needed:** Full step-by-step guide for first-time users and beginners.
+- **Easily extensible:** Add new metrics, custom scorers, new models, or pipelines with simple config/code.
+- **Robust test suite:** Pytest-based for total coverage, regression safety, and CI/CD integration.
+- **Cross-platform:** Works on Windows, Mac, Linux (with instructions for each).
+- **Beginner-friendly:** Simple setup and hand-holding docs.
 
-## 🧪 Running Tests
+---
 
--   **Run all tests**:
-    ```bash
-    poetry run pytest
-    ```
--   **Run a specific test file**:
-    ```bash
-    poetry run pytest tests/tests/test_metrics/test_faithfulness.py
-    ```
--   **Run tests with coverage report**:
-    ```bash
-    poetry run pytest --cov=utils
-    ```
+## 📁 Project Structure (What’s in Each Folder?)
 
-## 📈 Adding a New Metric
+- `main.py` – The main CLI runner and orchestrator
+- `utils/` – All helper utilities (logging, data loading, config, reporting, LLM wrappers, retry, etc.)
+- `models/` – Model and metric configs, model capability mapping
+- `tests/` – Pytest test suite for all metrics, coverage, and integrations
+- `dashboard/` – Streamlit app for interactive result visualization and PDF export
+- `examples/` – Demo scripts and sample usage
+- `requirements.txt` – All dependencies for pip install
 
-Follow these steps to add a new metric called `your_metric`:
+---
 
-1.  **Implement the Logic in `Scorer`**:
-    Open `utils/utils/scorer.py` and add a new method. It must accept the necessary inputs (e.g., answer, context) and return an `EvaluationResult` object.
+## 💻 How To Install and Launch (Step-by-Step for All OS)
 
-    ```python
-    # In utils/utils/scorer.py
-    from .scorer import EvaluationResult
+### **1. Prerequisites**
 
-    def evaluate_your_metric(self, answer: str, context: str) -> EvaluationResult:
-        # Your logic here
-        score = 0.9 # Calculate the score
-        details = "Your metric evaluation was successful."
-        return EvaluationResult(score=score, details=details)
-    ```
+- Python 3.9+ installed (`python --version`)
+- `pip` for package installs
+- (Optional) [Git](https://git-scm.com/) if cloning repo, or just download and extract zip
 
-2.  **Add a Test File**:
-    Create a new file `tests/tests/test_metrics/test_your_metric.py`. Use the `BaseMetricTest` class to minimize boilerplate.
+### **2. Clone or Download the Project**
 
-    ```python
-    # In tests/tests/test_metrics/test_your_metric.py
-    from tests.utils.base_metric_test import BaseMetricTest
-    # ... other imports
+**Using Git:**
+```sh
+git clone https://github.com/your-org/rag-llm-eval-testing-framework.git
+cd rag-llm-eval-testing-framework
 
-    class TestYourMetric(BaseMetricTest):
-        metric_name = "your_metric"
+Or download the ZIP:
+Download ZIP and unzip.
 
-        def run_evaluation(self, test_case: dict) -> EvaluationResult:
-            # Extract inputs and call the scorer method
-            answer = test_case["answer"]
-            context = test_case["context"]
-            return self.scorer.evaluate_your_metric(answer, context)
+3. Create a Virtual Environment (Recommended, all OS)
+Windows:
 
-        @pytest.mark.parametrize("test_case", BaseMetricTest.get_test_cases(metric_name))
-        def test_your_metric_logic(self, test_case: dict):
-            self.test_metric_logic(test_case)
-    ```
+sh
+Copy
+Edit
+python -m venv venv
+venv\Scripts\activate
+Mac/Linux:
 
-3.  **Add Test Data**:
-    Open `tests/data/test_data.json` and add test cases for your new metric.
+sh
+Copy
+Edit
+python3 -m venv venv
+source venv/bin/activate
+4. Install All Dependencies
+sh
+Copy
+Edit
+pip install -r requirements.txt
+5. Configure Your Models and API Keys
+Open config.json (in root folder) and edit to match your model provider and keys (OpenAI, Anthropic, local, etc.)
 
-    ```json
-    "your_metric": [
-      {
-        "answer": "An example answer.",
-        "context": "An example context.",
-        "expected_min_score": 0.8
-      }
-    ]
-    ```
+If using custom models, see models/model_capabilities.yaml for mapping and supported metrics.
 
-4.  **Update `MetricsManager`**:
-    Open `utils/utils/metrics_manager.py` and ensure the `evaluate_metrics` method correctly passes the required arguments to your new scorer method. You may need to add a new condition.
+For local LLMs, follow the instructions in the README_dev.md.
 
-5.  **(Optional) Add to `config.json`**:
-    To run your new metric by default, add `"your_metric"` to the `metrics` list in `config.json`.
+6. Add Your Test Data
+Place your data files (CSV or JSON) in the appropriate location (see config).
 
-## 🤖 Adding New Model Support
+Example CSV/JSON formats are provided in the tests/data/ folder.
 
-1.  **Update `LLMWrapper`**:
-    If the new model uses a different API provider, add logic to `utils/utils/llm_wrapper.py` to initialize its client and handle its `get_completion` request/response format.
+To generate test cases from your own documents, use the provided scripts or follow the GUIDE_FOR_FRESHERS.md.
 
-2.  **Update `ResponseParser`**:
-    Add a new `parse_<provider>` method to `utils/utils/response_parser.py` to transform the new model's raw response into a standardized `ParsedResponse` object.
+7. Run an Evaluation (CLI Example)
+sh
+Copy
+Edit
+python main.py --data tests/data/test_data.json --config config.json --output results/
+For more options (e.g., selecting model/metrics/output format), run:
 
-3.  **Update `model_capabilities.yaml`**:
-    Add the new model and its supported metrics to `models/model_capabilities.yaml`.
+sh
+Copy
+Edit
+python main.py --help
+8. View Results (Interactive Dashboard)
+sh
+Copy
+Edit
+cd dashboard
+streamlit run app.py
+Open the dashboard link in your browser to view visualizations, trends, and export PDF reports.
 
-4.  **Add to `config.json`**:
-    You can now specify the new model in your `config.json` to use it for evaluations.
+🛠️ Models and Supported Metrics
+Supported Models (out of the box):
+GPT-4 / GPT-3.5 (OpenAI)
+
+Claude (Anthropic)
+
+Llama/Llama2 (local)
+
+Custom LLMs (just set your provider/client in config)
+
+Adding New Models:
+Edit config.json and models/model_capabilities.yaml to register model, provider, and supported metrics.
+
+Add new API keys (see .env.example).
+
+Metric Support Matrix:
+Each model’s supported metrics are mapped in model_capabilities.yaml.
+
+The system will skip unsupported metrics automatically and report why (see HTML/JSON report).
+
+🧪 Adding New Metrics or Custom Tests
+New metric? Add its config in models/metric_config.py and code in utils/utils/scorer.py.
+
+Custom test? Copy tests/templates/custom_metric_template.py and follow the instructions.
+
+Register your metric in configs so it shows up in the dashboard and CLI.
+
+🧑‍💻 Developer/Contributor Notes
+See README_dev.md for full architecture, API, test, and extension instructions.
+
+Run tests with:
+
+sh
+Copy
+Edit
+pytest tests/
+For CI/CD integration, use the provided Jenkinsfile.
+
+📊 Output & Reporting
+CLI: Colorized, tabular, and summary output
+
+JSON/HTML: Detailed, structured, and suitable for automation
+
+Dashboard: Interactive plots, filtering, and PDF export
+
+Artifacts: All results saved to results/ (or as configured)
+
+🆘 Troubleshooting & FAQ
+Q: I get a “ModuleNotFoundError” or “ImportError”
+A: Activate your virtual environment and make sure dependencies are installed.
+
+Q: “API key not found” error
+A: Set your API keys in config.json or as environment variables.
+
+Q: Dashboard won’t launch or no data?
+A: Make sure your evaluations have produced results in the results/ or configured output folder.
+
+Q: How do I add my own LLM or metric?
+A: See the “Adding New Models/Metrics” section or README_dev.md.
+
+Q: I want to learn from scratch!
+A: Read the included GUIDE_FOR_FRESHERS.md.
+
+📂 Folder-by-Folder Project Map
+Folder/File	Purpose
+main.py	Main CLI entrypoint, orchestrator
+utils/	Utilities: logging, config, data loader, scorer, etc.
+models/	Model/metric configs and capability mapping
+tests/	Full test suite, templates, and test data
+dashboard/	Streamlit web dashboard
+examples/	Example scripts and usage
+requirements.txt	Python dependencies
+config.json	Global project and model config
+
+👋 For Total Beginners
+Don’t worry! Every step (from install to running to customizing) is in GUIDE_FOR_FRESHERS.md.
+
+Just follow that file step-by-step if you have zero ML, coding, or CLI experience.
+
+📣 Where to Get Help
+Open an issue on GitHub
+
+Email the maintainer listed in README_dev.md
+
+See the FAQ above or GUIDE_FOR_FRESHERS.md
