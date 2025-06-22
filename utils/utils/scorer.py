@@ -70,6 +70,66 @@ class Scorer:
         score = metric.measure(answer=answer)
         return EvaluationResult(score=score, details="Coherence score.")
 
+    # --- (all your existing code remains above) ---
+
+    # ===== GAP METRICS: Scaffolded implementations appended below =====
+
+    def evaluate_toxicity(self, answer):
+        """
+        Measures toxicity in output (e.g., via DeepEval or moderation API).
+        Returns EvaluationResult(score, details).
+        """
+        score = 0.0  # Replace with real logic/API call
+        details = {"reason": "Toxicity scorer not yet implemented."}
+        return EvaluationResult(score, details)
+
+    def evaluate_bias(self, answer):
+        """
+        Measures social/cultural bias (e.g., via DeepEval).
+        Returns EvaluationResult(score, details).
+        """
+        score = 0.0
+        details = {"reason": "Bias scorer not yet implemented."}
+        return EvaluationResult(score, details)
+
+    def evaluate_robustness(self, answer):
+        """
+        Evaluates model's robustness to adversarial/noisy input (DeepEval or your own logic).
+        Returns EvaluationResult(score, details).
+        """
+        score = 0.0
+        details = {"reason": "Robustness scorer not yet implemented."}
+        return EvaluationResult(score, details)
+
+    def evaluate_diversity(self, answers):
+        """
+        Measures diversity among multiple generations (DeepEval or your own logic).
+        answers: list of model outputs.
+        Returns EvaluationResult(score, details).
+        """
+        score = 0.0
+        details = {"reason": "Diversity scorer not yet implemented."}
+        return EvaluationResult(score, details)
+
+    def evaluate_faithfulness_error(self, answer, context):
+        """
+        Inverse of faithfulness (RAGAS); higher = worse.
+        Returns EvaluationResult(score, details).
+        """
+        score = 0.0
+        details = {"reason": "Faithfulness error scorer not yet implemented."}
+        return EvaluationResult(score, details)
+
+    def evaluate_supporting_fact_recall(self, answer, context):
+        """
+        Recall of supporting facts in context (RAGAS).
+        Returns EvaluationResult(score, details).
+        """
+        score = 0.0
+        details = {"reason": "Supporting fact recall scorer not yet implemented."}
+        return EvaluationResult(score, details)
+
+
     def evaluate_conciseness(self, answer: str) -> EvaluationResult:
         metric = ConcisenessMetric()
         score = metric.measure(answer=answer)
