@@ -1,3 +1,10 @@
+"""
+Test cases for evaluating named entities in RAG systems.
+
+This test suite covers both precision and recall sub-metrics
+for the named_entities metric, as returned in the details dictionary.
+"""
+
 import pytest
 from typing import Dict, Any
 from tests.utils.base_metric_test import BaseMetricTest
@@ -6,9 +13,9 @@ from utils.utils.scorer import EvaluationResult
 class TestNamedEntities(BaseMetricTest):
     """
     Test class for the 'named_entities' metric.
-    
-    This single test class verifies the overall score and also asserts on the
-    individual sub-metrics (precision and recall) returned in the details.
+
+    Verifies the overall named entity metric score and asserts on 
+    both 'precision' and 'recall' sub-metrics as reported in details.
     """
     metric_name = "named_entities"
 
@@ -26,30 +33,21 @@ class TestNamedEntities(BaseMetricTest):
     def test_named_entities_metric_and_submetrics(self, test_case: Dict[str, Any]):
         """
         Data-driven test for the 'named_entities' metric.
-        
-        This test performs two levels of checks:
-        1. Standard validation of the main score using the base class.
-        2. Specific validation of the precision and recall values in the details.
-        """
-        # --- 1. Standard test for the main score ---
-        self.test_metric_logic(test_case)
-        
-        # --- 2. Specific test for sub-metrics (precision and recall) ---
-        result = self.run_evaluation(test_case)
-        
-        # Check that the details dictionary contains precision and recall
-        assert "precision" in result.details, "Details dictionary must contain 'precision'."
-        assert "recall" in result.details, "Details dictionary must contain 'recall'."
-        
-        # If your test data includes expected values, assert against them.
-        # Note: You would need to add 'expected_precision' and 'expected_recall'
-        # to the corresponding entries in your test_data.json file.
-        if "expected_precision" in test_case:
-            expected_precision = test_case["expected_precision"]
-            assert result.details["precision"] == pytest.approx(expected_precision), \
-                f"Precision mismatch: Expected {expected_precision}, Got {result.details['precision']}"
 
+        This test checks:
+        1. Standard validation of the overall score (base class)
+        2. That precision and recall values are present and correct in details.
+        """
+        # Standard metric assertions
+        self.test_metric_logic(test_case)
+        # Check sub-metrics in the details
+        result = self.run_evaluation(test_case)
+        assert "precision" in result.details, "Details must include 'precision'."
+        assert "recall" in result.details, "Details must include 'recall'."
+        # Optionally check against expected values, if present in test case
+        if "expected_precision" in test_case:
+            assert result.details["precision"] == pytest.approx(test_case["expected_precision"]), \
+                f"Precision mismatch: Expected {test_case['expected_precision']}, Got {result.details['precision']}"
         if "expected_recall" in test_case:
-            expected_recall = test_case["expected_recall"]
-            assert result.details["recall"] == pytest.approx(expected_recall), \
-                f"Recall mismatch: Expected {expected_recall}, Got {result.details['recall']}"
+            assert result.details["recall"] == pytest.approx(test_case["expected_recall"]), \
+                f"Recall mismatch: Expected {test_case['expected_recall']}, Got {result.details['recall']}"
