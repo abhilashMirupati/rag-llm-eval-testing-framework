@@ -198,3 +198,15 @@ Open an issue on GitHub
 Email the maintainer listed in README_dev.md
 
 See the FAQ above or GUIDE_FOR_FRESHERS.md
+
+This project is ready for both production use and for newcomers to learn RAG evaluation—
+all feedback, issues, and contributions are welcome!
+
+yaml
+Copy
+Edit
+
+---
+
+**Say “done” and I’ll deliver `README_dev.md` next.  
+When you’re ready, I’ll finish with the expanded `GUIDE_FOR_FRESHERS.md`.**
