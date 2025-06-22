@@ -5,7 +5,6 @@ Coverage measures how well the response covers the relevant information from the
 
 import pytest
 from utils.scorer import Scorer
-import unittest
 from utils.utils.metrics_manager import MetricsManager
 
 @pytest.fixture
@@ -28,18 +27,6 @@ def sample_data():
             ["Quantum computers use qubits instead of bits.", "Qubits can be in multiple states.", "Quantum computing enables parallel processing."]
         ]
     }
-
-def test_coverage_metric(sample_data):
-    """Test the coverage metric evaluation."""
-    scorer = Scorer()
-    
-    for q, a, c in zip(sample_data["questions"], sample_data["answers"], sample_data["contexts"]):
-        result = scorer.evaluate(a, c, q, "coverage")
-        assert 0 <= result.score <= 1
-        assert isinstance(result.details, dict)
-        assert "covered_points" in result.details
-        assert "missed_points" in result.details
-        assert "coverage_ratio" in result.details
 
 @pytest.mark.parametrize("answer,context,expected_score", [
     (
@@ -64,6 +51,17 @@ def test_coverage_edge_cases(answer, context, expected_score):
     result = scorer.evaluate(answer, context, "What is the capital of France?", "coverage")
     assert abs(result.score - expected_score) < 0.1
 
+def test_coverage_metric(sample_data):
+    """Test the coverage metric evaluation."""
+    scorer = Scorer()
+    for q, a, c in zip(sample_data["questions"], sample_data["answers"], sample_data["contexts"]):
+        result = scorer.evaluate(a, c, q, "coverage")
+        assert 0 <= result.score <= 1
+        assert isinstance(result.details, dict)
+        assert "covered_points" in result.details
+        assert "missed_points" in result.details
+        assert "coverage_ratio" in result.details
+
 def test_coverage_batch_evaluation(sample_data):
     """Test batch evaluation of coverage metric."""
     scorer = Scorer()
@@ -72,7 +70,6 @@ def test_coverage_batch_evaluation(sample_data):
         sample_data["contexts"],
         sample_data["questions"]
     )
-    
     assert len(results) == len(sample_data["questions"])
     for result in results:
         assert "coverage" in result["metrics"]
@@ -86,7 +83,6 @@ def test_coverage_with_partial_information():
     scorer = Scorer()
     answer = "The company reported $1M in revenue."
     context = ["The company reported $1M in revenue.", "The company has 50 employees.", "The company was founded in 2020."]
-    
     result = scorer.evaluate(answer, context, "What are the company's key metrics?", "coverage")
     assert 0 < result.score < 1
     assert "partial_coverage" in result.details
@@ -97,51 +93,44 @@ def test_coverage_with_redundant_information():
     scorer = Scorer()
     answer = "The study found that the drug was effective. The study found that the drug was effective."
     context = ["The study found that the drug was effective."]
-    
     result = scorer.evaluate(answer, context, "What were the study findings?", "coverage")
     assert result.score == 1.0
     assert "redundant_information" in result.details
     assert len(result.details["redundant_information"]) > 0
 
-class TestCoverage(unittest.TestCase):
-    def setUp(self):
-        self.metrics_manager = MetricsManager()
-        self.test_data = {
-            "answer": "Regular exercise has numerous benefits including improved cardiovascular health, increased muscle strength, and better mental health. It can help reduce the risk of chronic diseases and improve overall quality of life.",
-            "context": "Exercise has numerous health benefits including improved heart health, increased muscle mass, and better mental health.",
-            "ground_truth": "Exercise provides various health benefits such as improved cardiovascular health, increased muscle strength, and enhanced mental well-being."
-        }
+@pytest.mark.parametrize("answer,context,ground_truth", [
+    (
+        "Regular exercise has numerous benefits including improved cardiovascular health, increased muscle strength, and better mental health. It can help reduce the risk of chronic diseases and improve overall quality of life.",
+        "Exercise has numerous health benefits including improved heart health, increased muscle mass, and better mental health.",
+        "Exercise provides various health benefits such as improved cardiovascular health, increased muscle strength, and enhanced mental well-being."
+    )
+])
+def test_coverage_manager_calculation(answer, context, ground_truth):
+    metrics_manager = MetricsManager()
+    score, details = metrics_manager.calculate_coverage(answer=answer, context=context)
+    assert isinstance(score, float)
+    assert 0.0 <= score <= 1.0
+    assert isinstance(details, dict)
 
-    def test_coverage_calculation(self):
-        score, details = self.metrics_manager.calculate_coverage(
-            answer=self.test_data["answer"],
-            context=self.test_data["context"]
-        )
-        self.assertIsInstance(score, float)
-        self.assertGreaterEqual(score, 0.0)
-        self.assertLessEqual(score, 1.0)
-        self.assertIsInstance(details, dict)
+def test_coverage_with_empty_inputs():
+    metrics_manager = MetricsManager()
+    score, details = metrics_manager.calculate_coverage("", "")
+    assert score == 0.0
+    assert isinstance(details, dict)
 
-    def test_coverage_with_empty_inputs(self):
-        score, details = self.metrics_manager.calculate_coverage("", "")
-        self.assertEqual(score, 0.0)
-        self.assertIsInstance(details, dict)
+def test_coverage_with_partial_content():
+    metrics_manager = MetricsManager()
+    score, details = metrics_manager.calculate_coverage(
+        "Exercise is good for health.",
+        "Exercise has numerous health benefits including improved heart health, increased muscle mass, and better mental health."
+    )
+    assert score < 0.7
+    assert isinstance(details, dict)
 
-    def test_coverage_with_partial_content(self):
-        score, details = self.metrics_manager.calculate_coverage(
-            "Exercise is good for health.",
-            self.test_data["context"]
-        )
-        self.assertLess(score, 0.7)
-        self.assertIsInstance(details, dict)
-
-    def test_coverage_with_extra_content(self):
-        score, details = self.metrics_manager.calculate_coverage(
-            self.test_data["answer"] + " Additional unrelated information about cooking.",
-            self.test_data["context"]
-        )
-        self.assertLess(score, 1.0)
-        self.assertIsInstance(details, dict)
-
-if __name__ == '__main__':
-    unittest.main()
+def test_coverage_with_extra_content():
+    metrics_manager = MetricsManager()
+    answer = "Regular exercise has numerous benefits including improved cardiovascular health, increased muscle strength, and better mental health. It can help reduce the risk of chronic diseases and improve overall quality of life. Additional unrelated information about cooking."
+    context = "Exercise has numerous health benefits including improved heart health, increased muscle mass, and better mental health."
+    score, details = metrics_manager.calculate_coverage(answer, context)
+    assert score < 1.0
+    assert isinstance(details, dict)
