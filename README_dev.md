@@ -1,125 +1,294 @@
-# RAG-LLM Evaluation Framework - Developer Guide
+# RAG-LLM Evaluation Testing Framework – Developer & Maintainer Guide
 
-This guide provides in-depth information for developers working on the framework's core components.
+**This is the comprehensive guide for developers, maintainers, and contributors to the RAG-LLM Evaluation Testing Framework.**  
+It explains the project’s internal structure, extension points, best practices, developer workflow, and advanced configuration.
 
-## 🏗️ Architectural Overview
+---
 
-The framework is designed with a modular architecture to ensure separation of concerns and extensibility.
+## Table of Contents
 
--   **`rag-eval-cli.py`**: The entry point for command-line operations. It uses `argparse` to parse arguments and calls `run_evaluation` in `main.py`.
--   **`main.py`**: The central orchestrator. It uses the various manager classes to coordinate the evaluation workflow: config -> data loading -> evaluation -> reporting.
--   **`utils/config_manager.py`**: Handles loading and providing access to settings from `config.json`.
--   **`utils/data_loader.py`**: Responsible for loading evaluation datasets from different file formats.
--   **`utils/metrics_manager.py`**: Iterates through the metrics defined in the config and calls the appropriate methods in the `Scorer`.
--   **`utils/scorer.py`**: The heart of the evaluation logic. Each metric has its own `evaluate_<metric_name>` method. This is where the actual computation happens.
--   **`utils/reporter.py`**: Takes the final results and generates reports in various formats (HTML, JSON, PDF) using templates.
--   **`dashboard/app.py`**: A self-contained Streamlit application for visualizing results stored in the database.
+- [1. Overview & Philosophy](#overview--philosophy)
+- [2. Architecture & Project Structure](#architecture--project-structure)
+- [3. Core Components Explained](#core-components-explained)
+- [4. Adding New Models, Metrics, and Test Cases](#adding-new-models-metrics-and-test-cases)
+- [5. Extending the Framework (Code, Config, API)](#extending-the-framework-code-config-api)
+- [6. Local LLM & Custom Model Support](#local-llm--custom-model-support)
+- [7. Developer Workflow & Testing](#developer-workflow--testing)
+- [8. Continuous Integration (CI) & Jenkins](#continuous-integration-ci--jenkins)
+- [9. Debugging, Troubleshooting, and Best Practices](#debugging-troubleshooting-and-best-practices)
+- [10. Contribution Guidelines](#contribution-guidelines)
+- [11. Support & Maintainer Info](#support--maintainer-info)
 
-## 🛠️ Development Setup
+---
 
-1.  **Prerequisites**: Python 3.9+ and Poetry.
-2.  **Installation**:
-    ```bash
-    # Clone the repository
-    git clone [https://github.com/yourusername/rag-llm-eval-testing-framework.git](https://github.com/yourusername/rag-llm-eval-testing-framework.git)
-    cd rag-llm-eval-testing-framework
+## 1. Overview & Philosophy
 
-    # Install dependencies using Poetry
-    poetry install
+This framework is designed to **enable robust, scalable, and reproducible evaluation of RAG pipelines and LLM-based retrieval systems**.  
+**Everything is modular:** new models, metrics, and reporting can be plugged in with minimal friction, while core evaluation flows are production-grade.
 
-    # Install pre-commit hooks for automated code quality checks
-    poetry run pre-commit install
-    ```
-3.  **Environment Variables**:
-    Copy `.env.example` to `.env` and fill in your API keys. The framework loads these variables automatically.
-    ```bash
-    cp .env.example .env
-    ```
+- **No logic is ever trimmed from user/contributor code.**
+- **Tests, metrics, and configs are all explicit and traceable.**
+- **Designed for:**
+  - Automated CI/CD integration
+  - Easy onboarding of new contributors
+  - Real-world, large-scale LLM/RAG evaluation
 
-## 🧪 Running Tests
+---
 
--   **Run all tests**:
-    ```bash
-    poetry run pytest
-    ```
--   **Run a specific test file**:
-    ```bash
-    poetry run pytest tests/tests/test_metrics/test_faithfulness.py
-    ```
--   **Run tests with coverage report**:
-    ```bash
-    poetry run pytest --cov=utils
-    ```
+## 2. Architecture & Project Structure
 
-## 📈 Adding a New Metric
+The project follows a clear, layered design for **traceability, reliability, and extensibility**.
 
-Follow these steps to add a new metric called `your_metric`:
+rag-llm-eval-testing-framework/
+│
+├── main.py # Main CLI entrypoint and orchestrator
+├── utils/ # Utilities: logging, config, data loading, scorer, wrappers
+│ └── utils/ # Sub-utilities: LLM wrappers, retry, templates, etc.
+├── models/ # Model/metric configs and model capability matrix
+├── tests/ # Pytest suite for all metrics, regression, and integration
+│ └── tests/ # Metric-by-metric tests (one class/file per metric)
+│ └── utils/ # Test utilities, fixtures, and test data loading
+├── dashboard/ # Streamlit dashboard for interactive analysis and export
+├── examples/ # Example evaluation scripts and demo configs
+├── requirements.txt # All dependencies
+├── config.json # Global configuration file for models, data, and output
+├── Jenkinsfile # Jenkins pipeline for CI/CD (test, lint, coverage, etc.)
+├── README.md # End-user documentation and installation guide
+├── README_dev.md # (This file) Developer/contributor/internal documentation
+└── GUIDE_FOR_FRESHERS.md # Beginner step-by-step setup guide
 
-1.  **Implement the Logic in `Scorer`**:
-    Open `utils/utils/scorer.py` and add a new method. It must accept the necessary inputs (e.g., answer, context) and return an `EvaluationResult` object.
 
-    ```python
-    # In utils/utils/scorer.py
-    from .scorer import EvaluationResult
 
-    def evaluate_your_metric(self, answer: str, context: str) -> EvaluationResult:
-        # Your logic here
-        score = 0.9 # Calculate the score
-        details = "Your metric evaluation was successful."
-        return EvaluationResult(score=score, details=details)
-    ```
+---
 
-2.  **Add a Test File**:
-    Create a new file `tests/tests/test_metrics/test_your_metric.py`. Use the `BaseMetricTest` class to minimize boilerplate.
+## 3. Core Components Explained
 
-    ```python
-    # In tests/tests/test_metrics/test_your_metric.py
-    from tests.utils.base_metric_test import BaseMetricTest
-    # ... other imports
+### **main.py**
+- **The main orchestrator:**  
+  - Parses CLI arguments
+  - Loads configs, models, and test data
+  - Instantiates all core managers (Config, Metrics, Reporter, Scorer)
+  - Runs the full evaluation loop and triggers reporting
 
-    class TestYourMetric(BaseMetricTest):
-        metric_name = "your_metric"
+### **utils/**
+- **Helper utilities:**  
+  - `logger.py` — project-wide logging setup
+  - `data_loader.py` — loads CSV/JSON test cases
+  - `config_manager.py` — parses and validates configs (config.json, YAML, etc.)
+  - `metrics_manager.py` — connects test cases, metric configs, and scoring
+  - `reporter.py` — builds and exports CLI, HTML, JSON, and PDF reports
+  - `scorer.py` — implements all evaluation metric functions, wrapping RAGAS, DeepEval, and custom logic
+  - `llm_wrapper.py` — safe, retryable API for OpenAI/Anthropic/Local/Custom models
 
-        def run_evaluation(self, test_case: dict) -> EvaluationResult:
-            # Extract inputs and call the scorer method
-            answer = test_case["answer"]
-            context = test_case["context"]
-            return self.scorer.evaluate_your_metric(answer, context)
+### **models/**
+- `model_config.py` — Model-specific settings, config parsing, and capability checks
+- `metric_config.py` — Metric definition, required fields, and validation logic
+- `model_capabilities.yaml` — Matrix mapping each model to supported metrics (add new models here)
 
-        @pytest.mark.parametrize("test_case", BaseMetricTest.get_test_cases(metric_name))
-        def test_your_metric_logic(self, test_case: dict):
-            self.test_metric_logic(test_case)
-    ```
+### **tests/**
+- **Comprehensive pytest suite:**  
+  - `tests/tests/` — One file/class per metric, each with full batch and edge case coverage
+  - `tests/utils/` — Shared test data handlers, fixtures, config utilities, data loader
+  - `tests/templates/` — Template files for easily adding new metrics/tests
 
-3.  **Add Test Data**:
-    Open `tests/data/test_data.json` and add test cases for your new metric.
+### **dashboard/**
+- **Streamlit dashboard:**  
+  - Loads SQLite or CSV results
+  - Provides interactive trend analysis, metric filtering, PDF export, and summary stats
 
-    ```json
-    "your_metric": [
-      {
-        "answer": "An example answer.",
-        "context": "An example context.",
-        "expected_min_score": 0.8
-      }
-    ]
-    ```
+### **examples/**
+- Demo evaluation scripts and walkthroughs for new users
 
-4.  **Update `MetricsManager`**:
-    Open `utils/utils/metrics_manager.py` and ensure the `evaluate_metrics` method correctly passes the required arguments to your new scorer method. You may need to add a new condition.
+---
 
-5.  **(Optional) Add to `config.json`**:
-    To run your new metric by default, add `"your_metric"` to the `metrics` list in `config.json`.
+## 4. Adding New Models, Metrics, and Test Cases
 
-## 🤖 Adding New Model Support
+### **Add a New Model (Cloud or Local):**
+1. **Add model to `models/model_capabilities.yaml`:**
+   ```yaml
+   models:
+     my-llama:
+       provider: local
+       supported_metrics: [faithfulness, factuality, fluency, ...]
 
-1.  **Update `LLMWrapper`**:
-    If the new model uses a different API provider, add logic to `utils/utils/llm_wrapper.py` to initialize its client and handle its `get_completion` request/response format.
 
-2.  **Update `ResponseParser`**:
-    Add a new `parse_<provider>` method to `utils/utils/response_parser.py` to transform the new model's raw response into a standardized `ParsedResponse` object.
+Add API key/config section in config.json:
 
-3.  **Update `model_capabilities.yaml`**:
-    Add the new model and its supported metrics to `models/model_capabilities.yaml`.
+json
+Copy
+Edit
+{
+  "models": {
+    "my-llama": {
+      "type": "local",
+      "path": "/path/to/model",
+      "params": {...}
+    }
+  }
+}
+If using a new provider:
+Implement a new class in utils/llm_wrapper.py (subclassing or following the interface for get_completion()).
 
-4.  **Add to `config.json`**:
-    You can now specify the new model in your `config.json` to use it for evaluations.
+Add a New Metric:
+Define it in models/metric_config.py:
+
+python
+Copy
+Edit
+class MetricConfig:
+    ...
+# Add your metric’s config
+Implement logic in utils/scorer.py:
+
+python
+Copy
+Edit
+def evaluate_my_metric(self, answer, context, ...):
+    # Metric logic here
+    return EvaluationResult(score, details)
+Register sample data for tests in tests/data/ (JSON or CSV).
+
+Create a test file in tests/tests/ (copy from template).
+
+Update metric mapping in model_capabilities.yaml if needed.
+
+Add a New Test Case:
+Add your case in the relevant JSON/CSV in tests/data/
+
+Use proper metric name as used in the scorer/config
+
+5. Extending the Framework (Code, Config, API)
+To add a new report/export format:
+Extend reporter.py, implement new method, and update CLI/config to allow it.
+
+To add a new LLM provider:
+Extend llm_wrapper.py and update config/CLI to allow user to select it.
+
+To add custom CLI flags:
+Update argument parsing in main.py, document the flag, and pass values to relevant modules.
+
+6. Local LLM & Custom Model Support
+Supported local models: Llama, Llama2, and any HuggingFace-compatible model.
+
+For local inference:
+
+Set "type": "local" and "path" in config.json.
+
+Ensure your machine has enough resources (RAM, GPU if needed).
+
+For running local server (e.g., vLLM, llamacpp, text-generation-webui), set the API endpoint in config.
+
+Tip:
+Use llm_wrapper.py as your integration point for all local and custom inference.
+
+7. Developer Workflow & Testing
+Setup
+sh
+Copy
+Edit
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+Run All Tests
+sh
+Copy
+Edit
+pytest tests/
+Check Lint, Type, and Coverage
+sh
+Copy
+Edit
+flake8 .
+black --check .
+mypy .
+pytest --cov=utils --cov=models --cov=main tests/
+Development Best Practices
+Use the provided templates in tests/templates/ for new metrics or test cases.
+
+Ensure all logic, even edge cases, is tested—never trim coverage for speed.
+
+Check all code against existing metrics/tests before major refactors.
+
+Always update or extend the test suite if adding new features.
+
+8. Continuous Integration (CI) & Jenkins
+Pipeline defined in Jenkinsfile (see also test_jenkins_pipeline.py for pipeline tests).
+
+Stages:
+
+Checkout
+
+Lint (flake8, pylint, black, mypy)
+
+Test (pytest)
+
+Coverage
+
+Build/Deploy (if configured)
+
+Artifact collection (HTML/JSON reports, coverage.xml, etc.)
+
+Notifications (Slack, Teams, email—if credentials set)
+
+9. Debugging, Troubleshooting, and Best Practices
+If you hit “ModuleNotFoundError”:
+
+Check your virtual environment and PYTHONPATH.
+
+“API key not found”:
+
+Check env vars and config.json.
+
+For local models, make sure path is set and model files exist.
+
+Tests failing unexpectedly?
+
+Run pytest tests/ --maxfail=1 -v and check stack trace.
+
+Compare your test data and config mapping—metrics must match model capability.
+
+Adding a new metric or model and seeing “not supported” warnings?
+
+Update model_capabilities.yaml for your new entries.
+
+Performance slow?
+
+Use smaller test data, batch calls, or run on a machine with more memory/CPU.
+
+Dashboard not loading?
+
+Ensure streamlit is installed, output data exists, and browser cache is clear.
+
+10. Contribution Guidelines
+Fork and branch before making changes.
+
+Always extend or add to the test suite for new features.
+
+Use clear docstrings and comments—code should be readable by future maintainers.
+
+Never trim logic or edge cases:
+
+Coverage, robustness, and test traceability are top priorities.
+
+Run all tests and lint before submitting a PR.
+
+Document all new flags, metrics, or model support in README.md and/or here.
+
+11. Support & Maintainer Info
+For questions or bugs, open an issue in GitHub or contact the project maintainer (see project page).
+
+For major contributions, review the CI logs and project status before submitting.
+
+To join as a maintainer, reach out via the repo contact email.
+
+Thank you for helping keep this project robust, reproducible, and production-ready!
+
+yaml
+Copy
+Edit
+
+---
+
+**When you say “done,”  
+I’ll deliver the final file:  
+**`GUIDE_FOR_FRESHERS.md` – a truly beginner, step-by-step, hand-holding guide!**
