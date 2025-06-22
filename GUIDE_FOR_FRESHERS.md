@@ -1,183 +1,223 @@
-# Guide for Newcomers to the RAG LLM Evaluation Framework
+# GUIDE_FOR_FRESHERS.md
 
-Welcome! This guide is designed to help you get started with the project quickly and effectively.
+> **A Step-by-Step Beginner’s Guide to Setting Up and Using the RAG-LLM Evaluation Testing Framework**
 
-## 🚀 Quick Start
+---
 
-1.  **Setup Your Environment**:
-    ```bash
-    # Clone the repository
-    git clone [https://github.com/yourusername/rag-llm-eval-testing-framework.git](https://github.com/yourusername/rag-llm-eval-testing-framework.git)
-    cd rag-llm-eval-testing-framework
+## What is this Framework?
 
-    # Use our setup script to create a virtual environment and install dependencies
-    # This script handles Python, pip, requirements, and spaCy model installation.
-    bash setup.sh
+This framework helps you **test and compare the accuracy and reliability of large language models (LLMs)** when answering questions based on your own documents.  
+It’s built for anyone: **total beginners, students, QA engineers, or data scientists**—no deep ML or coding knowledge required!
 
-    # Activate the virtual environment
-    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-    ```
+---
 
-2.  **Configure Your API Keys**:
-    -   Rename `.env.example` to `.env`.
-    -   Open the `.env` file and add your API key for the LLM provider you want to use (e.g., `OPENAI_API_KEY`).
+## 🌱 Getting Started – The Fast Path
 
-3.  **Run an Evaluation**:
-    Use the command-line interface (CLI) to run your first evaluation. You'll need a dataset and a configuration file. We've provided examples.
-    ```bash
-    # Run the comprehensive example which creates temporary data and config
-    python examples/comprehensive_evaluation.py
-    ```
-    This will generate reports in the `example_reports/` directory.
+### 1. **Install Python**
 
-4.  **Explore the Dashboard**:
-    The dashboard is the best way to visualize results.
-    ```bash
-    # Start the dashboard using the helper script
-    bash dashboard.sh
-    ```
-    Now, open your web browser to `http://localhost:8501`.
-
-## 📂 Project Structure
-
-Here is a high-level overview of the project's structure:
-
-rag-llm-eval-testing-framework/
-├── dashboard/              # Streamlit dashboard application
-│   └── app.py
-├── examples/               # Example scripts showing how to use the framework
-├── models/                 # Model and metric capability definitions
-├── tests/                  # All test files (unit, integration)
-├── utils/                  # Core framework utilities
-│   ├── templates/          # HTML templates for reports
-│   ├── config_manager.py   # Handles loading config.json
-│   ├── data_loader.py      # Loads data from files (CSV, JSON)
-│   ├── llm_wrapper.py      # Wrapper for LLM API calls
-│   ├── metrics_manager.py  # Orchestrates metric calculations
-│   ├── reporter.py         # Generates evaluation reports
-│   └── scorer.py           # Contains the logic for all evaluation metrics
-├── .env.example            # Example for environment variables (API keys)
-├── config.json             # Main configuration file
-├── main.py                 # Main function orchestrating the evaluation run
-├── rag-eval-cli.py         # Command-Line Interface entry point
-├── requirements.txt        # Project dependencies
-└── README.md               # Main project documentation
+- You need **Python 3.9 or later**.
+- Download it here: [python.org/downloads](https://www.python.org/downloads/).
+- To check, open a terminal or command prompt and type:
+  ```sh
+  python --version
 
 
-## ✅ Common Tasks
+  If it prints something like Python 3.10.5, you’re good!
 
-### Running Evaluations from the CLI
+2. Download the Project
+Go to the GitHub repo (your-org/rag-llm-eval-testing-framework)
 
-The `rag-eval-cli.py` script is your main tool for running evaluations.
+Click the green “Code” button, then “Download ZIP.”
 
-```bash
-# Basic evaluation using default config and a specified data file
-rag-eval --data_path tests/data/test_data.csv
+Unzip/extract it to a folder on your computer.
 
-# Override the model and metrics from the config file
-rag-eval --data_path tests/data/test_data.csv --model_name "gpt-3.5-turbo" --metrics "faithfulness" "fluency"
-Adding a New Metric
-Implement Logic: Add a new evaluate_<your_metric_name> method to utils/utils/scorer.py.
-Add Test: Create a new test file tests/tests/test_metrics/test_<your_metric_name>.py that inherits from BaseMetricTest.
-Add Test Data: Add cases for your new metric to tests/data/test_data.json.
-Update Config: Add your new metric's name to config.json to run it by default.
-See CONTRIBUTING.md for more details.
+3. Open Your Terminal or Command Prompt
+On Windows: Press Win+R, type cmd, and press Enter.
 
-troubleshoot
-Dashboard Not Starting: Ensure you have activated the virtual environment (source .venv/bin/activate) and that port 8501 is free.
-Tests Failing: Check that all dependencies are installed (pip install -r requirements.txt) and that your .env file is set up correctly.
-LLM Connection Issues: Verify your API keys in the .env file are correct and that you have an active internet connection.
-📚 Learning Resources
-README.md: The main project overview.
-CONTRIBUTING.md: Detailed guidelines for contributing.
-examples/ directory: Practical, executable examples.
-Welcome aboard, and we look forward to your contributions!
+On Mac/Linux: Open Terminal from Applications or with Spotlight.
 
+Navigate to your project folder:
 
-***
+sh
+Copy
+Edit
+cd path/to/rag-llm-eval-testing-framework
+(Replace path/to with where you extracted the project.)
 
-### `README.md`
-```markdown
-# RAG LLM Evaluation Framework
+4. Set Up a Virtual Environment (Recommended)
+This keeps all project dependencies in one place.
 
-An advanced, extensible, and user-friendly framework for the comprehensive evaluation of Retrieval-Augmented Generation (RAG) systems.
+Type:
 
-![Dashboard Screenshot](https://user-images.githubusercontent.com/12345/67890.png) ## ✨ Features
+Windows:
 
--   **Comprehensive Metrics**: Over 15 built-in metrics including `faithfulness`, `answer_relevance`, `context_recall`, `fluency`, and `hallucination`.
--   **Broad LLM Support**: Seamlessly switch between models from providers like OpenAI, Anthropic, and local models.
--   **Interactive Dashboard**: A powerful Streamlit dashboard to visualize results, compare model performance, and track trends over time.
--   **Extensive Reporting**: Automatically generate detailed reports in multiple formats (HTML, JSON, PDF).
--   **Highly Extensible**: Easily add custom metrics and models with a clean, modular architecture.
--   **Robust Testing**: A comprehensive test suite using `pytest` ensures reliability and correctness.
--   **Developer Friendly**: Comes with a CLI, detailed documentation, and setup scripts for a smooth development experience.
+sh
+Copy
+Edit
+python -m venv venv
+venv\Scripts\activate
+Mac/Linux:
 
-## 🚀 Quick Start
+sh
+Copy
+Edit
+python3 -m venv venv
+source venv/bin/activate
+You should see (venv) in your terminal—this means the environment is active.
 
-1.  **Setup Environment**:
-    Our setup script handles everything from creating a virtual environment to installing dependencies and required models.
-    ```bash
-    bash setup.sh
-    ```
+5. Install All Required Packages
+sh
+Copy
+Edit
+pip install -r requirements.txt
+This will install all the Python packages you need for the framework to work.
 
-2.  **Activate Environment**:
-    ```bash
-    source .venv/bin/activate
-    ```
+6. Configure Model API Keys and Settings
+If you want to use GPT-4, Claude, or other cloud models, you’ll need an API key (ask your team or sign up with the provider).
 
-3.  **Configure API Keys**:
-    ```bash
-    cp .env.example .env
-    # Now, edit the .env file with your API keys
-    ```
+Open the file config.json in Notepad, VSCode, or any text editor.
 
-4.  **Run a Sample Evaluation**:
-    Use the command-line tool to run an evaluation on the provided sample data.
-    ```bash
-    rag-eval --data_path tests/data/test_data.csv --config_path config.json --output_dir reports
-    ```
+Paste your API keys or set your model path if using a local LLM.
 
-5.  **Launch the Dashboard**:
-    ```bash
-    bash dashboard.sh
-    ```
-    Navigate to `http://localhost:8501` in your browser to see the results.
+Double-check the model names and supported metrics in models/model_capabilities.yaml.
 
-## 📂 Project Structure
+7. Prepare Your Test Data
+You can use the example data in tests/data/test_data.json or tests/data/test_data.csv.
 
-rag-llm-eval-testing-framework/
-├── dashboard/              # Streamlit dashboard application
-├── examples/               # Example scripts
-├── models/                 # Model and metric capability definitions
-├── tests/                  # All test files
-├── utils/                  # Core framework utilities
-│   ├── templates/          # HTML templates for reports
-│   ├── config_manager.py   # Handles configuration
-│   ├── data_loader.py      # Loads datasets
-│   ├── llm_wrapper.py      # Wrapper for LLM APIs
-│   ├── metrics_manager.py  # Orchestrates metric evaluation
-│   ├── reporter.py         # Generates reports
-│   └── scorer.py           # Core logic for all metrics
-├── .env.example            # Example for environment variables
-├── config.json             # Main configuration file
-├── main.py                 # Main evaluation orchestrator
-├── rag-eval-cli.py         # Command-Line Interface
-├── requirements.txt        # Project dependencies
-└── README.md               # This file
+To add your own questions/answers/contexts, just edit or copy these files—keep the format the same!
 
+8. Run Your First Evaluation
+sh
+Copy
+Edit
+python main.py --data tests/data/test_data.json --config config.json --output results/
+(Change the file paths if your data/config are elsewhere)
 
-## Documentation
+What happens?
 
--   [**Guide for Newcomers**](GUIDE_FOR_FRESHERS.md): Your starting point for using the framework.
--   [**Contributing Guidelines**](CONTRIBUTING.md): Learn how to contribute to the project.
--   [**Developer Guide**](README_dev.md): In-depth guide for advanced development.
--   [**Code of Conduct**](CODE_OF_CONDUCT.md): Our community standards.
+The script reads your test cases.
 
-## 🤝 Contributing
+It asks your chosen model(s) to answer each question using the context.
 
-We welcome contributions of all kinds! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to get started.
+It runs dozens of tests and scores the answers using built-in metrics.
 
-## 📄 License
+It saves the results to the results/ folder.
 
-This project is licensed under the MIT License - see the `LICENSE` file for details.
+9. See Your Results
+For quick results, look at the results/ folder—JSON and HTML reports are generated.
 
+To get a beautiful dashboard:
+
+sh
+Copy
+Edit
+cd dashboard
+streamlit run app.py
+Click the link that appears, and you’ll get charts, tables, PDF export, and more!
+
+🏆 What Metrics Are Measured?
+Faithfulness: Did the model stay true to the source context?
+
+Factuality: Is the answer actually correct?
+
+Fluency: Is it written in clear, proper language?
+
+Hallucination: Did it “make up” info not in the docs?
+
+Relevance: Did it answer the question or wander off-topic?
+
+Helpfulness, redundancy, conciseness, completeness, instruction following, and more!
+
+All metrics are scored from 0 (bad) to 1 (perfect), and most reports explain the details.
+
+🧑‍🔬 How to Add Your Own Test Cases
+Open tests/data/test_data.json (or .csv) in a text editor.
+
+Add new entries, keeping the same keys as in the examples:
+
+json
+Copy
+Edit
+{
+  "question": "Who wrote Hamlet?",
+  "context": ["William Shakespeare wrote Hamlet."],
+  "answer": "Hamlet was written by Shakespeare."
+}
+Save the file and re-run the evaluation.
+
+The system will automatically pick up your new tests!
+
+🤖 How to Add or Switch Models
+Edit config.json to change which model to use.
+
+See models/model_capabilities.yaml to check which metrics each model supports.
+
+If you want to use a local (offline) model, follow the README_dev.md for setup tips.
+
+🛠️ Troubleshooting & Common Problems
+Q: It says "ModuleNotFoundError" or “No module named X”
+
+Did you run pip install -r requirements.txt in your virtual environment?
+
+Make sure your (venv) is activated in the terminal.
+
+Q: “API key not found”
+
+Open config.json and make sure your key is present.
+
+Or set it as an environment variable:
+On Windows:
+
+sh
+Copy
+Edit
+set OPENAI_API_KEY=sk-xxxxx
+On Mac/Linux:
+
+sh
+Copy
+Edit
+export OPENAI_API_KEY=sk-xxxxx
+Q: Dashboard shows no results
+
+Run main.py first so results are generated.
+
+Make sure the output folder in your command matches what the dashboard expects.
+
+Q: Something else is wrong
+
+Check the error message—it usually tells you what’s missing.
+
+Ask a teammate or open an issue on GitHub.
+
+🏁 Next Steps
+Try editing the test data or config and see how your scores change.
+
+Explore the dashboard to compare different models or questions.
+
+To go deeper, see the main README.md or README_dev.md for advanced features.
+
+💡 Tips for Total Beginners
+You can’t break anything! If you make a mistake, just delete and unzip the project again.
+
+You don’t need to know code—just follow the steps above and edit the data/config files as shown.
+
+Every file has comments or sample entries to help you.
+
+If you want to learn how it works “under the hood,” read README_dev.md for technical details.
+
+🆘 Still stuck?
+Ask for help on GitHub, send an email to the maintainer, or share your error message with a teammate.
+
+Welcome to the world of RAG and LLM evaluation—you’re already ahead of most beginners!
+
+pgsql
+Copy
+Edit
+
+---
+
+**That’s all three docs!  
+You now have the world’s most beginner-to-expert-friendly RAG-LLM evaluation project docs—ready to copy.**
+
+If you want a PDF/HTML conversion, a quickstart poster, or anything else, just ask!
